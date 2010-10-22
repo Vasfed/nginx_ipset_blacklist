@@ -1,0 +1,49 @@
+== nginx_ipset_blacklist
+
+An nginx module for using netfilter ipsets as a black/white list.
+In comparison to standard nginx access module this allows for dynamic list updating, without nginx reload/restart.
+
+== Installation
+
+* Get youself a linux server with root access
+* Install ipset 4.4 (see http://ipset.netfilter.org/install.html)
+* Get nginx source code, unpack etc.
+* Install libssl-dev, pcre and other nginx requirements
+* Configure nginx with this module:
+    ./configure --with-module=/path/to/nginx_ipset_blacklist
+* Compile, install
+* Configure nginx to run workers as root (this is needed to allow access to ipsets)
+* Create yout ipset and add some 'offending' ips to it:
+    sudo ipset -N myblacklist iphash
+    sudo ipset -A myblacklist 127.0.0.1
+* Start nginx
+* Profit!
+
+== Usage
+Sample nginx config:
+    user root;
+    worker_processes  1;
+    
+    events {
+      worker_connections  1024;
+    }
+    
+    http {
+      blacklist "myblacklist";
+      include       mime.types;
+      default_type  application/octet-stream;
+      
+      server {
+        # your server configuration goes here
+      }
+      
+      server {
+        whitelist "my_whitelist"; # this server will not use global blacklist, but instad use local whitelist
+        ...
+      }
+    }
+
+For blocked ips server will respond with 403 error to any request.
+
+== Author
+nginx_ipset_blacklist was written by Vasily Fedoseyev aka Vasfed

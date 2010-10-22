@@ -1,0 +1,5 @@
+ngx_addon_name=ngx_http_ipset_blacklist
+HTTP_MODULES="$HTTP_MODULES ngx_http_ipset_blacklist"
+
+NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_http_ipset_blacklist.c"
+NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ipset_read.c"
