@@ -144,12 +144,7 @@ static char* ngx_http_ipset_access_list_conf(ngx_conf_t *cf, ngx_command_t *cmd,
     //check if cmd was 'whitelist' or 'blacklist'
     conf->mode = value[0].data[0] == 'b' ? e_mode_blacklist : e_mode_whitelist;
 
-
-    //debug
-    ngx_conf_log_error(NGX_LOG_WARN, cf, 0, "configured for ipset %V", &value[1]);
-
-
-    //test here:
+    //perform a test read:
     struct sockaddr_in addr;
     int res = IPS_FAIL;
     char* err = "cannot convert test ip to int";
@@ -203,10 +198,12 @@ static ngx_int_t ngx_http_ipset_access_handler(ngx_http_request_t *r)
       if((conf->mode == e_mode_whitelist && (res == IPS_NOT_IN_SET || res == IPS_FAIL)) ||
          (conf->mode == e_mode_blacklist && res == IPS_IN_SET)){
         
-        //TODO: remove in production?
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, "access for %s forbidden by black/whitelist", inet_ntoa(((struct sockaddr_in*)r->connection->sockaddr)->sin_addr));
+        r->keepalive = 0;
 
-        return NGX_HTTP_FORBIDDEN;
+        //return a non-standard status when blacklisting
+        if(conf->mode == e_mode_blacklist)
+          return 444;
+        return NGX_HTTP_FORBIDDEN;        
       }
 
       return NGX_OK;  
