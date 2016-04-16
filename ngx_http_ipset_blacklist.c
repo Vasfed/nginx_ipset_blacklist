@@ -164,10 +164,13 @@ static char* ngx_http_ipset_access_list_conf(ngx_conf_t *cf, ngx_command_t *cmd,
 //-------------------------------------------------------------------------------------------------------------
 static ngx_int_t ngx_http_ipset_on_init_process(ngx_cycle_t *cycle){  
   
-  if(geteuid() != 0) {
+  
+    //  Sorry, but using root UID on nginx s very bad idea.
+    //  Let's use systemd capabilities
+/*  if(geteuid() != 0) {
     ngx_log_error(NGX_LOG_ERR, cycle->log, 0, "To run ipsets all worker threads need to be run as root (check config)");
     return NGX_ERROR;
-  }
+  } */
   
   if(1){
     //do we need re-init?
